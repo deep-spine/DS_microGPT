@@ -22,10 +22,10 @@ class micro_gpt_1:
 
     """
     @staticmethod
-    def run_fn(X, params:dict, num_heads):
+    def run_fn(X, params:dict, num_heads, seq_len):
 
         # Block 1
-        x1 = word_embedding(params["embed"], X)
+        x1 = word_embedding(params["embed"], X, seq_len)
         x1 = layer_norm(params["ln1"], x1)
         x1_attn = multi_head_attention(params["attn1"], x1, num_heads)
         x1_attn += x1
@@ -73,10 +73,10 @@ class micro_gpt_2:
         self.model_d = model_d
 
     @staticmethod
-    def run_fn(X, params:dict, num_heads):
+    def run_fn(X, params:dict, num_heads, seq_len):
 
         # Embedding and first layer norm
-        x = word_embedding(params["embed"], X)
+        x = word_embedding(params["embed"], X, seq_len)
         
         # Block 1
         x1 = layer_norm(params["ln1"], x)
@@ -148,8 +148,8 @@ class micro_gpt_4:
     """
 
     @staticmethod
-    def run_fn(X, params: dict, num_heads):
-        x = word_embedding(params["embed"], X)            
+    def run_fn(X, params: dict, num_heads, seq_len):
+        x = word_embedding(params["embed"], X, seq_len)            
 
         # Block 1 
         x_norm = layer_norm(params["ln1"], x)
