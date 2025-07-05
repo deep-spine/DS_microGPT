@@ -29,12 +29,13 @@ def _embed(params, token_idx):
     d_model = params["embedding_table"].shape[1]
     return emb * jnp.sqrt(d_model)
 
-def word_embedding(params, tokens, seq_len):
+def word_embedding(params, tokens):
     emb_table = params["embedding_table"] 
     d_model = emb_table.shape[1]
 
     embeddings = emb_table[tokens] * jnp.sqrt(d_model)
 
+    seq_len = tokens.shape[1]
     pos = pos_encoding(seq_len, d_model)  # (seq_len, d_model)
     pos = jnp.expand_dims(pos, axis=0)    # (1, seq_len, d_model)
 
