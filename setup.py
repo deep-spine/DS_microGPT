@@ -24,5 +24,5 @@ setup(
     ],
     keywords="gpt jax transformer deep-learning language-model microGPT deepspine",
     license="MIT",
-    zip_safe=False,
+    zip_safe=False
 )
