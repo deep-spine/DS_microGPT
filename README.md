@@ -1,19 +1,21 @@
-# microGPT 
-An academic implementation of GPT: only math and JAX 
+# DS_microGPT  
+An academic implementation of GPT: only math and JAX
 
 ---
 
 <img src="media/image-4.png" alt="transformer_diagram" width="100%">
 
-**microGPT** is a reflection of how the original **Transformer** layers were engineered back in 2017 at **Google**. This is a **very low-level implementation** of GPT, built entirely from **math equations and JAX**.
+**microGPT** is a reflection of how the original **Transformer** layers were engineered back in 2017 at **Google**. This is a **very low-level implementation** of GPT, built entirely from **mathematical equations and JAX**.  
 Core components like **Self-Attention**, **Embeddings**, **LayerNorm**, and **Feedforward Networks** are implemented **from scratch**, designed to help newcomers understand the inner workings of **LLMs** — without hiding behind prebuilt abstractions.
 
+---
 
 ## Setup
+
 ### Installation:
-- clone the repo
-- go to the project folder
-- install
+- Clone the repo  
+- Navigate to the project directory  
+- Install as a package
 
 ```bash
 git clone https://github.com/kandarpa02/microGPT.git
@@ -22,24 +24,41 @@ pip install .
 ```
 
 ### Dependencies:
-- install required packages
+- Install required packages
 
 ```bash
-pip install requirements.txt 
+pip install -r requirements.txt
 ```
-## User instructions
-### Know the modules:
-The **GPT** stacks are here [gpt_micro.py](microGPT/stack/gpt_micro.py), you will find `micro_gpt_1`, `micro_gpt_2` and `micro_gpt_4`, the previous two **micro_gpt**s were used for experimenting with smaller data such as [openwebtext10k](https://huggingface.co/datasets/stas/openwebtext-10k), those are small but show we can use such compact language models for very domain specific tasks like grocery chatbot, auto-complete for edge devices like smart-watches and many more. 
 
-#### Experiment 1:
-However in this project I mostly focused on `micro_gpt_4` (17M parameters), which I trained on **TPU v3-8**, with a small dataset [Openwebtext1G](https://www.kaggle.com/datasets/kandarpasarkar/openwebtext1g) (around 1GB) of the original Openwebtext dataset, which is approximately 2.22% of the original size. Finally, I trained the model for 60 epochs and got around `PPL 17.85`. But this model underfits due to lack of depth.
+---
 
-#### Experiment 2 (final):
-**But later I applied the scaling laws from the 2022 paper** [Training Compute-Optimal Large Language Models](https://arxiv.org/abs/2203.15556) **from DeepMind**, and found that the 10M version of that `micro_gpt_4` is ideal for [openwebtext10k](https://huggingface.co/datasets/stas/openwebtext-10k), and if I go with the 1GB variant of **OpenWebText** the model has to be of **350M+** parameters. So after pretraining for 74 Epochs I got the best model for my setup and it performed well, got around `PPL 31.02`. This experiment I can say is efficient according to the amount of data.
+## User Instructions
 
-**training configs:**
+### Understanding the Modules:
 
-*Experiment 1*
+The core GPT stacks are located in [gpt_micro.py](microGPT/stack/gpt_micro.py).  
+You'll find `micro_gpt_1`, `micro_gpt_2`, and `micro_gpt_4`. The earlier versions were used for experimentation with smaller datasets like [openwebtext10k](https://huggingface.co/datasets/stas/openwebtext-10k). These small models demonstrate the feasibility of running compact transformers on resource-constrained devices for tasks such as grocery chatbots, smart-watch autocomplete, and more.
+
+---
+
+### Experiment 1:
+Our main focus in this project is `micro_gpt_4` (17M parameters), trained on **TPU v3-8** using a reduced version of OpenWebText (~1GB), hosted [here](https://www.kaggle.com/datasets/kandarpasarkar/openwebtext1g) — about **2.22% of the full corpus**. We trained the model for 60 epochs and achieved a perplexity of approximately `PPL 17.85`.  
+However, this model underfits due to a lack of depth.
+
+---
+
+### Experiment 2 (Final):
+Later, we applied the scaling laws from DeepMind’s 2022 paper:  
+[Training Compute-Optimal Large Language Models](https://arxiv.org/abs/2203.15556).  
+
+We found that the **10M** parameter version of `micro_gpt_4` is optimal for `openwebtext10k`, while a proper fit for the 1GB dataset would require a **350M+** parameter model.  
+After pretraining for 74 epochs, the best version achieved around `PPL 31.02`, which is efficient given the data scale.
+
+---
+
+### Training Configs
+
+*Experiment 1:*
 ```python
 import jax.numpy as jnp
 import optax
@@ -61,7 +80,8 @@ optimizer = optax.chain(
     optax.adamw(learning_rate=scheduler, weight_decay=0.01) 
 )
 ```
-*Experiment 2*
+
+*Experiment 2:*
 ```python
 import jax.numpy as jnp
 import optax
@@ -84,32 +104,41 @@ optimizer = optax.chain(
 )
 ```
 
-Now `micro_gpt_4` takes two arguments `vocab`, `model_d`
+---
+
+### Using `micro_gpt_4`
+
+This model takes two arguments: `vocab`, and `model_d`.
 
 ```python
 from microGPT.stack.gpt_micro import micro_gpt_4
 
 # Experiment 1
-gpt = micro_gpt_4(vocab = 9000, model_d = 512)
-print(gpt.count_params()) # 17205248
+gpt = micro_gpt_4(vocab=9000, model_d=512)
+print(gpt.count_params())  # 17,205,248
 
 # Experiment 2
-gpt = micro_gpt_4(vocab = 8000, model_d = 384)
-print(gpt.count_params()) # 10160640
+gpt = micro_gpt_4(vocab=8000, model_d=384)
+print(gpt.count_params())  # 10,160,640
 ```
 
-Get the parameters and run forward pass like this
+---
+
+### Forward Pass
 
 ```python
 import jax
 
 params = gpt.get_params()
-forward = jax.jit(gpt.run_fn, static_argnames=['num_heads']) # compile the function
-logit = forward(input_ids, params, num_heads = 12)
-
+forward = jax.jit(gpt.run_fn, static_argnames=['num_heads'])  # JIT compile
+logit = forward(input_ids, params, num_heads=12)
 ```
 
-The parameter initialization is manual with `seed = 0` by default, you can find the weight initializaton functions here [param_setup.py](microGPT/decoder/params/param_setup.py)
+---
+
+### Parameter Initialization
+
+The parameters are manually initialized with `seed = 0` by default. You can inspect or modify the initialization logic in [param_setup.py](microGPT/decoder/params/param_setup.py):
 
 ```python
 def get_params(self):
@@ -139,10 +168,13 @@ def get_params(self):
     return params
 ```
 
-You can consider training it further with more diverse datasets!
+---
 
-I will add an inference module soon.
+## What’s Next
+
+We're working on an inference module to streamline deployment and testing.  
+Feel free to fork the repo, build on it, or train on your own domain-specific data.
 
 ---
 
-*If you like this repo, do give it a star :)*
+**If you find this project helpful, consider giving it a ⭐️ — we’d really appreciate it!**
