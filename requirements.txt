@@ -2,3 +2,4 @@ jax
 jaxlib
 optax
 pytest
+dm-haiku
