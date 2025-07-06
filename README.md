@@ -1,4 +1,4 @@
-# DS_microGPT  
+# microGPT  
 An academic implementation of GPT: only math and JAX
 
 ---
