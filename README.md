@@ -172,7 +172,6 @@ def get_params(self):
 
 ## What’s Next
 
-We're working on an inference module to streamline deployment and testing.  
 Feel free to fork the repo, build on it, or train on your own domain-specific data.
 
 ---
