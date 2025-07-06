@@ -18,7 +18,7 @@ Core components like **Self-Attention**, **Embeddings**, **LayerNorm**, and **Fe
 - Install as a package
 
 ```bash
-git clone https://github.com/kandarpa02/microGPT.git
+git clone https://github.com/deep-spine/ds-microGPT.git
 cd microGPT
 pip install .
 ```
