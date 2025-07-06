@@ -34,7 +34,7 @@ The **GPT** stacks are here [gpt_micro.py](microGPT/stack/gpt_micro.py), you wil
 #### Experiment 1:
 However in this project I mostly focused on `micro_gpt_4` (17M parameters), which I trained on **TPU v3-8**, with a small dataset [Openwebtext1G](https://www.kaggle.com/datasets/kandarpasarkar/openwebtext1g) (around 1GB) of the original Openwebtext dataset, which is approximately 2.22% of the original size. Finally, I trained the model for 60 epochs and got around `PPL 17.85`. But this model underfits due to lack of depth.
 
-#### Experiment 2 (final)
+#### Experiment 2 (final):
 **But later I applied the scaling laws from the 2022 paper** [Training Compute-Optimal Large Language Models](https://arxiv.org/abs/2203.15556) **from DeepMind**, and found that the 10M version of that `micro_gpt_4` is ideal for [openwebtext10k](https://huggingface.co/datasets/stas/openwebtext-10k), and if I go with the 1GB variant of **OpenWebText** the model has to be of **350M+** parameters. So after pretraining for 74 Epochs I got the best model for my setup and it performed well, got around `PPL 31.02`. This experiment I can say is efficient according to the amount of data.
 
 **training config:**
@@ -42,6 +42,7 @@ However in this project I mostly focused on `micro_gpt_4` (17M parameters), whic
 import jax.numpy as jnp
 import optax
 
+# Experiment 1
 num_heads = 8
 epochs = 60
 batch_size = 128
@@ -52,6 +53,28 @@ scheduler = optax.warmup_cosine_decay_schedule(
     peak_value=5e-4,          
     warmup_steps=100,          
     decay_steps=7600, 
+    end_value=1e-5         
+)
+
+optimizer = optax.chain(
+    optax.clip_by_global_norm(1.0),    
+    optax.adamw(learning_rate=scheduler, weight_decay=0.01) 
+
+
+)
+
+
+# Experiment 2
+num_heads = 12
+epochs = 100
+batch_size = 64
+precision = jnp.bfloat16
+
+scheduler = optax.warmup_cosine_decay_schedule(
+    init_value=0.0,
+    peak_value=5e-4,          
+    warmup_steps=100,          
+    decay_steps=20000, 
     end_value=1e-5         
 )
 
