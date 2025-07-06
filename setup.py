@@ -6,14 +6,14 @@ with open(os.path.join(this_directory, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
 setup(
-    name="DS_microGPT",
+    name="ds-microGPT",
     version="0.1.0",
     author="DeepSpine",
     author_email="kandarpaexe@gmail.com",
     description="A lightweight, JAX-based GPT model focused on transparency, hackability, and minimalism.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/DeepSpine/DS_microGPT",
+    url="https://github.com/deep-spine/ds-microGPT.git",
     packages=find_packages(),
     python_requires=">=3.8",
     classifiers=[
