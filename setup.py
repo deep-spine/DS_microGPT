@@ -1,14 +1,19 @@
 from setuptools import setup, find_packages
+import os
+
+this_directory = os.path.abspath(os.path.dirname(__file__))
+with open(os.path.join(this_directory, "README.md"), encoding="utf-8") as f:
+    long_description = f.read()
 
 setup(
-    name="microGPT",
+    name="DS_microGPT",
     version="0.1.0",
-    author="Kandarpa Sarkar",
+    author="DeepSpine",
     author_email="kandarpaexe@gmail.com",
-    description="Pre training of a lightweight GPT model",
-    long_description=open("README.md", encoding="utf-8").read(),
+    description="A lightweight, JAX-based GPT model focused on transparency, hackability, and minimalism.",
+    long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/kandarpa02/microGPT.git",
+    url="https://github.com/DeepSpine/DS_microGPT",
     packages=find_packages(),
     python_requires=">=3.8",
     classifiers=[
@@ -17,7 +22,7 @@ setup(
         "Operating System :: OS Independent",
         "Intended Audience :: Developers",
     ],
+    keywords="gpt jax transformer deep-learning language-model microGPT deepspine",
     license="MIT",
     zip_safe=False,
-    
 )
