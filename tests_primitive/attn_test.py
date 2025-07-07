@@ -1,5 +1,5 @@
 import jax.random as random
-from gpt_jaxfn.decoder.attn.attention import *
+from mgpt_legacy.decoder.attn.attention import *
 
 def test():
     key = random.PRNGKey(0)

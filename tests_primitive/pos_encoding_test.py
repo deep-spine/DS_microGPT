@@ -1,4 +1,4 @@
-from gpt_jaxfn.decoder.embed.embedding import *
+from mgpt_legacy.decoder.embed.embedding import *
 
 def test():
     out = pos_encoding(10, 6)

@@ -15,7 +15,7 @@
 import jax
 import jax.numpy as jnp
 from jax import lax
-from gpt_jaxfn.decoder.params.param_setup import init_embedding_params
+from mgpt_legacy.decoder.params.param_setup import init_embedding_params
 
 def pos_encoding(seq_len, d_model):
     i = jnp.arange(d_model)

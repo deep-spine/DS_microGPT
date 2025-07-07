@@ -12,7 +12,7 @@
 # ==============================================================================
 
 
-from ds_mgpt.seed import KEYS
+from mgpt_core.seed import KEYS
 import haiku as hk
 import jax.random as random
 from nami.JAX import Nami

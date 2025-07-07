@@ -1,9 +1,9 @@
-from ds_mgpt.layers.ffn import FFN_Nami
+from mgpt_core.layers.ffn import FFN_Nami
 import jax.random as random
 import haiku as hk
 
 def test():
-    from ds_mgpt.seed import KEYS
+    from mgpt_core.seed import KEYS
     k1, k2, k3 = KEYS(42, 3)
     def f(x):
         ffn = FFN_Nami(out_feat = 64)

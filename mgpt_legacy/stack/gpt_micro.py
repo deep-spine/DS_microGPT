@@ -12,11 +12,11 @@
 # ==============================================================================
 
 
-from gpt_jaxfn.decoder.attn.attention import *
-from gpt_jaxfn.decoder.embed.embedding import *
-from gpt_jaxfn.decoder.layernorm.lnorm import *
-from gpt_jaxfn.decoder.linear.linear_layer import *
-from gpt_jaxfn.decoder.params.param_setup import *
+from mgpt_legacy.decoder.attn.attention import *
+from mgpt_legacy.decoder.embed.embedding import *
+from mgpt_legacy.decoder.layernorm.lnorm import *
+from mgpt_legacy.decoder.linear.linear_layer import *
+from mgpt_legacy.decoder.params.param_setup import *
 import jax
 
 class micro_gpt_1:
