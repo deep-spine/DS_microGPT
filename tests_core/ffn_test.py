@@ -2,7 +2,7 @@ from mgpt_core.layers.ffn import FFN_Nami
 import jax.random as random
 import haiku as hk
 
-def test():
+def test()->None:
     from mgpt_core.seed import KEYS
     k1, k2, k3 = KEYS(42, 3)
     def f(x):
