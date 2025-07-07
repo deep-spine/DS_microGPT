@@ -21,4 +21,5 @@ jobs:
 
       - name: Run tests
         run: |
-          PYTHONPATH=. pytest tests_primitive/, tests_core
+          PYTHONPATH=. pytest tests_core/
+          PYTHONPATH=. pytest tests_primitive/
