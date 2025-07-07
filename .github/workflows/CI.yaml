@@ -17,7 +17,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install jax jaxlib flax optax pytest
+          pip install -r requirements.txt
 
       - name: Run tests
         run: |
