@@ -17,7 +17,7 @@ import jax.numpy as jnp
 from jax import lax
 from mgpt_legacy.decoder.params.param_setup import init_embedding_params
 
-def pos_encoding(seq_len, d_model):
+def pos_encoding(seq_len:int, d_model:int):
     i = jnp.arange(d_model)
     even_i = i[::2]
     denominator = jnp.power(10000.0, even_i / d_model)
