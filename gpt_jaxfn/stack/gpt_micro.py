@@ -1,3 +1,17 @@
+# ==============================================================================
+#  Project: ds_microGPT
+#  Author: DeepSpine Research (2025–present)
+#  License: MIT
+#
+#  A compact, distilled GPT architecture written in JAX/Haiku.
+#  Designed for high-output, low-weight inference, TensorFlow export,
+#  and real-world fine-tuned deployment.
+#
+#  Copyright (c) 2025–present DeepSpine Research.
+#  Licensed under the MIT License. See LICENSE for details.
+# ==============================================================================
+
+
 from gpt_jaxfn.decoder.attn.attention import *
 from gpt_jaxfn.decoder.embed.embedding import *
 from gpt_jaxfn.decoder.layernorm.lnorm import *
