@@ -1,6 +1,11 @@
 # microGPT  
+
+---
 An academic implementation of GPT: only math and JAX
-(*This repository was imported from the original functional [microGPT](https://github.com/kandarpa02/microGPT.git) by [Kandarpa Sarkar](https://github.com/kandarpa02); this Readme is outdated, we will update this soon!*)
+
+---
+*This repository was imported from the original functional [microGPT](https://github.com/kandarpa02/microGPT.git) by [Kandarpa Sarkar](https://github.com/kandarpa02); this Readme is outdated, we will update this soon!*
+
 ---
 
 <img src="media/image-4.png" alt="transformer_diagram" width="100%">
