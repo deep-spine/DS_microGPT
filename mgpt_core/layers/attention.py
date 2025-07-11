@@ -15,6 +15,7 @@
 import jax 
 import jax.numpy as jnp
 import haiku as hk
+from mgpt_core.layers.rotary_positional_embedding import get_freqs, RoPE
 
 __all__ = ["MhAttention"]
 
@@ -40,6 +41,10 @@ class MhAttention(hk.Module):
         self.mask = mask
     
     def __call__(self, x:jnp.ndarray):
+
+        batch, seq, dim = x.shape
+        n_dim = dim // self.n_heads
+
         qw = hk.get_parameter('qw', shape=[self.d_model, self.d_model], init=hk.initializers.RandomNormal())
         kw = hk.get_parameter('kw', shape=[self.d_model, self.d_model], init=hk.initializers.RandomNormal())
         vw = hk.get_parameter('vw', shape=[self.d_model, self.d_model], init=hk.initializers.RandomNormal())
@@ -49,8 +54,16 @@ class MhAttention(hk.Module):
         K = x @ kw
         V = x @ vw
 
-        Q = split_heads(Q, self.n_heads)
-        K = split_heads(K, self.n_heads)
+        # split_heads fuction is useless for Q and K since RoPE has to be implemented 
+        # between reshape and transpose
+        Q = Q.reshape(batch, seq, self.n_heads, n_dim)
+        K = K.reshape(batch, seq, self.n_heads, n_dim)
+        freq = get_freqs(seq, n_dim)
+        Q = RoPE(Q, freq)
+        K = RoPE(K, freq)
+
+        Q = jnp.transpose(Q, (0, 2, 1, 3))
+        K = jnp.transpose(K, (0, 2, 1, 3))
         V = split_heads(V, self.n_heads)
 
         score = Q @ jnp.swapaxes(K, -1, -2) / jnp.sqrt(self.d_model)
@@ -68,6 +81,4 @@ class MhAttention(hk.Module):
         out = merged @ ow
         return out
     
-
-
 
