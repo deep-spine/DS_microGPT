@@ -3,7 +3,7 @@
 ---
 An academic implementation of GPT: only math and JAX
 
-*(This repository was imported from the original functional [`microGPT`](https://github.com/kandarpa02/microGPT.git) by [`Kandarpa Sarkar`](https://github.com/kandarpa02) so the Readme is outdated, we will update this soon!)*
+*(This repository is based on the original functional [`microGPT`](https://github.com/kandarpa02/microGPT.git) implementation by [`Kandarpa Sarkar`](https://github.com/kandarpa02), and was imported into the DeepSpine organization from [`@kandarpa02`](https://github.com/kandarpa02). The README is partially outdated and refers to the earlier version — documentation updates are in progress to reflect the DeepSpine variant.)*
 
 ---
 
