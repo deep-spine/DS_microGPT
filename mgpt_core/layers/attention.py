@@ -70,8 +70,7 @@ class MhAttention(hk.Module):
         score = score.astype(jnp.float32)
 
         if self.mask:
-            _, _, seq_l, _ = x.shape
-            mask = jnp.tril(jnp.ones((1, 1, seq_l, seq_l), dtype=jnp.float32))
+            mask = jnp.tril(jnp.ones((1, 1, seq, seq), dtype=jnp.float32))
             score = score - 1e10 * (1.0 - mask)
 
         weights = jax.nn.softmax(score, axis=-1)
