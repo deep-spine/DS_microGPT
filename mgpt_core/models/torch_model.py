@@ -149,7 +149,7 @@ class Hyuga_echo(nn.Module):
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
-model = torch.compile(Hyuga_neuro05(vocab_size=32000))
+model = torch.compile(Hyuga_neuro05(vocab_size=50304, mask = True))
 print(model)
 print(f"Total trainable parameters: {count_parameters(model):,}")
 
