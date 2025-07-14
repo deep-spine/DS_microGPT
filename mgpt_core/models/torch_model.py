@@ -62,7 +62,7 @@ class MhAttention(nn.Module):
         K = K.permute(0, 2, 1, 3)
         V = split_heads(V, self.n_heads)
 
-        scores = Q @ K.transpose(-1, -2) / torch.sqrt(self.d_model)
+        scores = Q @ K.transpose(-1, -2) / self.d_model**0.5
         scores = scores.float()
 
         if self.mask:
@@ -104,7 +104,7 @@ class Transformer(nn.Module):
 
 
 class Hyuga_neuro05(nn.Module):
-    def __init__(self, vocab_size, mask=False):
+    def __init__(self, vocab_size, mask=True):
         super().__init__()
         self.dim = 1024
         self.heads = 32
@@ -126,7 +126,7 @@ class Hyuga_neuro05(nn.Module):
 
 
 class Hyuga_echo(nn.Module):
-    def __init__(self, vocab_size, mask=False):
+    def __init__(self, vocab_size, mask=True):
         super().__init__()
         self.dim = 2048
         self.heads = 32

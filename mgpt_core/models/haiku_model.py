@@ -37,7 +37,7 @@ class Hyuga_neuro05(hk.Module):
     def __init__(
         self,
         vocab_size: int,
-        mask=False,
+        mask=True,
         name="Hyuga_neuro05"
     ):
         super().__init__(name=name)
@@ -71,7 +71,7 @@ class Hyuga_echo(hk.Module):
     def __init__(
         self,
         vocab_size: int,
-        mask=False,
+        mask=True,
         name="Hyuga_echo"
     ):
         super().__init__(name=name)
