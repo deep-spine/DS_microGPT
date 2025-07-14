@@ -19,7 +19,7 @@ import jax
 import jax.numpy as jnp
 
 class Transformer(hk.Module):
-    
+
     """
     Single Transformer encoder block using Haiku, composed of LayerNorm, Multi-head Attention with RoPE, 
     and a gated FFN block with Nami activation.
@@ -104,7 +104,7 @@ class Hyuga_neuro(hk.Module):
         self.mask = mask
 
         self.embedding_weights = hk.get_parameter(
-            "embed", shape=[vocab_size, self.dim], init=hk.initializers.TruncatedNormal(stddev=0.02)
+            "embed", shape=[vocab_size, self.dim], init=hk.initializers.TruncatedNormal(stddev=0.02), dtype=jnp.float16
         )
         self.final_ln = hk.LayerNorm(axis=-1, create_scale=True, create_offset=True)
 
@@ -168,7 +168,7 @@ class Hyuga_echo(hk.Module):
         self.mask = mask
 
         self.embedding_weights = hk.get_parameter(
-            "embed", shape=[vocab_size, self.dim], init=hk.initializers.TruncatedNormal(stddev=0.02)
+            "embed", shape=[vocab_size, self.dim], init=hk.initializers.TruncatedNormal(stddev=0.02), dtype=jnp.float16
         )
         self.final_ln = hk.LayerNorm(axis=-1, create_scale=True, create_offset=True)
 

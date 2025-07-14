@@ -18,7 +18,7 @@ import jax.random as random
 from nami.JAX import Nami
 
 class FFN_Nami(hk.Module):
-    
+
     """
     Feedforward network (FFN) block with Nami activation gating.
 

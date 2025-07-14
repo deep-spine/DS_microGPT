@@ -34,7 +34,7 @@ def merge_heads(x):
 
 
 class MhAttention(hk.Module):
-    
+
     """
     Multi-head self-attention module implemented in Haiku.
 
@@ -69,10 +69,10 @@ class MhAttention(hk.Module):
         batch, seq, dim = x.shape
         n_dim = dim // self.n_heads
 
-        qw = hk.get_parameter('qw', shape=[self.d_model, self.d_model], init=hk.initializers.RandomNormal())
-        kw = hk.get_parameter('kw', shape=[self.d_model, self.d_model], init=hk.initializers.RandomNormal())
-        vw = hk.get_parameter('vw', shape=[self.d_model, self.d_model], init=hk.initializers.RandomNormal())
-        ow = hk.get_parameter('ow', shape=[self.d_model, self.d_model], init=hk.initializers.RandomNormal())
+        qw = hk.get_parameter('qw', shape=[self.d_model, self.d_model], init=hk.initializers.RandomNormal(), dtype=jnp.float16)
+        kw = hk.get_parameter('kw', shape=[self.d_model, self.d_model], init=hk.initializers.RandomNormal(), dtype=jnp.float16)
+        vw = hk.get_parameter('vw', shape=[self.d_model, self.d_model], init=hk.initializers.RandomNormal(), dtype=jnp.float16)
+        ow = hk.get_parameter('ow', shape=[self.d_model, self.d_model], init=hk.initializers.RandomNormal(), dtype=jnp.float16)
 
         Q = x @ qw
         K = x @ kw
