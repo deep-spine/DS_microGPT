@@ -42,9 +42,9 @@ class Hyuga_neuro05(hk.Module):
     ):
         super().__init__(name=name)
         self.vocab_size = vocab_size
-        self.dim = 512
-        self.heads = 16
-        self.num_layers = 128
+        self.dim = 1024
+        self.heads = 32
+        self.num_layers = 42
         self.mask = mask
 
         self.embedding_weights = hk.get_parameter(
@@ -76,9 +76,9 @@ class Hyuga_echo(hk.Module):
     ):
         super().__init__(name=name)
         self.vocab_size = vocab_size
-        self.dim = 1024
+        self.dim = 2048
         self.heads = 32
-        self.num_layers = 36
+        self.num_layers = 24
         self.mask = mask
 
         self.embedding_weights = hk.get_parameter(
@@ -101,29 +101,29 @@ class Hyuga_echo(hk.Module):
         return logits
 
 
-from mgpt_core.seed import KEYS
-k1, k2, k3 = KEYS(42, 3)
-def f(x):
-    t = Hyuga_neuro05(
-        vocab_size=50304,
-        mask=True
-        )
-    return t(x)
+# from mgpt_core.seed import KEYS
+# k1, k2, k3 = KEYS(42, 3)
+# def f(x):
+#     t = Hyuga_neuro05(
+#         vocab_size=50304,
+#         mask=True
+#         )
+#     return t(x)
 
-net = hk.transform(f)
-x = jax.random.randint(k1, (1, 3072), 1, 1000)
+# net = hk.transform(f)
+# x = jax.random.randint(k1, (1, 3072), 1, 1000)
 
-param = net.init(k2, x)
+# param = net.init(k2, x)
 
-# out = net.apply(param, k3, x)
+# # out = net.apply(param, k3, x)
 
-print(x.shape)
+# print(x.shape)
 
 
 
-def count_params(params):
-    return sum(jnp.size(x) for x in jax.tree_util.tree_leaves(params))
+# def count_params(params):
+#     return sum(jnp.size(x) for x in jax.tree_util.tree_leaves(params))
 
-print(count_params(param)*1e-6) 
+# print(count_params(param)*1e-6) 
 
-del param, x, net
+# del param, x, net

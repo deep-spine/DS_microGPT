@@ -106,9 +106,9 @@ class Transformer(nn.Module):
 class Hyuga_neuro05(nn.Module):
     def __init__(self, vocab_size, mask=False):
         super().__init__()
-        self.dim = 512
-        self.heads = 16
-        self.num_layers = 128
+        self.dim = 1024
+        self.heads = 32
+        self.num_layers = 42
         self.vocab_size = vocab_size
 
         self.embed = nn.Embedding(vocab_size, self.dim)
@@ -128,9 +128,9 @@ class Hyuga_neuro05(nn.Module):
 class Hyuga_echo(nn.Module):
     def __init__(self, vocab_size, mask=False):
         super().__init__()
-        self.dim = 1024
+        self.dim = 2048
         self.heads = 32
-        self.num_layers = 36
+        self.num_layers = 24
         self.vocab_size = vocab_size
 
         self.embed = nn.Embedding(vocab_size, self.dim)
@@ -146,10 +146,11 @@ class Hyuga_echo(nn.Module):
             x = block(x)
         return self.out_proj(x)
 
-def count_parameters(model):
-    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+# def count_parameters(model):
+#     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
-model = torch.compile(Hyuga_neuro05(vocab_size=50304, mask = True))
-print(model)
-print(f"Total trainable parameters: {count_parameters(model):,}")
+# model = torch.compile(Hyuga_echo(vocab_size=52000, mask = True))
+# print(model)
+# print(f"Total trainable parameters: {count_parameters(model):,}")
 
+# del model
