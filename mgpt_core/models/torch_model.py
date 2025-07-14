@@ -31,6 +31,39 @@ def merge_heads(x):
 
 
 class MhAttention(nn.Module):
+
+    """
+    Multi-head self-attention module with Rotary Positional Embedding (RoPE) and optional causal masking.
+
+    This implementation performs multi-head attention using manually defined query, key, value,
+    and output projection matrices (`qw`, `kw`, `vw`, `ow`). Rotary positional encoding is applied 
+    to both Q and K tensors before attention computation.
+
+    Args:
+        d_model (int): Total hidden dimension of the model (embedding size).
+        n_heads (int): Number of attention heads.
+        mask (bool): If True, applies causal (autoregressive) masking (default: False).
+        device (torch.device): Device for positional frequency generation (default: CUDA).
+
+    Attributes:
+        qw (nn.Parameter): Query projection weight of shape [d_model, d_model].
+        kw (nn.Parameter): Key projection weight of shape [d_model, d_model].
+        vw (nn.Parameter): Value projection weight of shape [d_model, d_model].
+        ow (nn.Parameter): Output projection weight of shape [d_model, d_model].
+
+    Input:
+        x (torch.Tensor): Input tensor of shape [batch_size, seq_len, d_model].
+
+    Returns:
+        torch.Tensor: Output tensor of shape [batch_size, seq_len, d_model].
+
+    Notes:
+        - Q and K are positionally encoded using Rotary Positional Embedding (RoPE).
+        - Attention weights are computed via scaled dot-product attention.
+        - If `mask=True`, causal masking is applied using a lower triangular mask.
+        - Uses helper functions `get_freqs_t`, `RoPE_t`, `split_heads`, and `merge_heads`.
+    """
+
     def __init__(self, d_model, n_heads, mask=False, device = torch.device('cuda')):
         super().__init__()
         self.d_model = d_model
@@ -76,6 +109,32 @@ class MhAttention(nn.Module):
 
 
 class FFN_Nami(nn.Module):
+
+    """
+    Feedforward network (FFN) block with Nami-activated gating.
+
+    This module implements a gated feedforward block for Transformers. It expands the input using
+    a linear layer, applies the Nami activation to a parallel gating path, multiplies them element-wise, 
+    and then projects back to the original dimension.
+
+    Architecture:
+        x -> Linear (4 * dim) ---> (_x)
+        x -> Linear (4 * dim) -> Nami() ---> (gate)
+        output = proj(_x * gate)
+
+    Args:
+        dim (int): Input and output feature dimension.
+
+    Attributes:
+        fc (nn.Linear): Main linear layer that expands input to 4 * dim.
+        gate (nn.Linear): Parallel linear layer whose output is gated via Nami activation.
+        proj (nn.Linear): Final projection layer to reduce back to `dim`.
+        nami (nn.Module): Custom Nami activation function.
+
+    Returns:
+        torch.Tensor: Output tensor of shape [batch, seq_len, dim].
+    """
+
     def __init__(self, dim):
         super().__init__()
         self.fc = nn.Linear(dim, dim * 4)
@@ -90,6 +149,34 @@ class FFN_Nami(nn.Module):
 
 
 class Transformer(nn.Module):
+    
+    """
+    Single Transformer encoder block using LayerNorm, Multi-head Attention with RoPE, and FFN_Nami.
+
+    This block applies:
+        - Pre-layer normalization before attention and feedforward.
+        - Multi-head attention with Rotary Positional Embeddings (RoPE).
+        - Feedforward network using Nami-activated gating.
+        - Residual connections after both attention and FFN sublayers.
+
+    Args:
+        dim (int): Hidden size of the model (embedding dimension).
+        heads (int): Number of attention heads.
+        mask (bool): If True, enables causal masking (for autoregressive models).
+
+    Attributes:
+        ln1 (nn.LayerNorm): Layer normalization before attention.
+        ln2 (nn.LayerNorm): Layer normalization before feedforward.
+        attn (MhAttention): Multi-head self-attention module with RoPE and optional masking.
+        ffn (FFN_Nami): Feedforward network with Nami activation gating.
+
+    Input:
+        x (torch.Tensor): Input tensor of shape [batch_size, seq_len, dim].
+
+    Returns:
+        torch.Tensor: Output tensor of shape [batch_size, seq_len, dim].
+    """
+
     def __init__(self, dim, heads, mask=False):
         super().__init__()
         self.ln1 = nn.LayerNorm(dim)
@@ -104,6 +191,32 @@ class Transformer(nn.Module):
 
 
 class Hyuga_neuro(nn.Module):
+
+    """
+    Hyuga_neuro is a compact yet deep language model optimized for reasoning and high-throughput inference.
+
+    Model Architecture:
+    - Parameters: ~756M
+    - Hidden Size (d_model): 1024
+    - FFN Inner Dimension: 4096
+    - Attention Heads: 32
+    - Layers: 42
+    - Positional Encoding: Rotary (RoPE)
+    - Activation: Nami (custom smooth nonlinearity)
+
+    Attributes:
+        vocab_size (int): Size of the input vocabulary.
+        dim (int): Embedding dimension and model width.
+        heads (int): Number of self-attention heads.
+        num_layers (int): Total number of Transformer layers.
+        mask (bool): Whether to use causal attention masking.
+
+    Notes:
+        - Uses weight tying between input embedding and output projection layer.
+        - Designed for research in efficient transformer reasoning.
+
+    """
+
     def __init__(self, vocab_size, mask=True):
         super().__init__()
         self.dim = 1024
@@ -130,6 +243,32 @@ class Hyuga_neuro(nn.Module):
 
 
 class Hyuga_echo(nn.Module):
+
+    """
+    Hyuga_echo is a powerful language model designed for high-capacity reasoning and dialogue tasks, 
+    balancing depth and width for efficient inference at scale.
+
+    Model Architecture:
+    - Parameters: ~1.7B
+    - Hidden Size (d_model): 2048
+    - FFN Inner Dimension: 8192
+    - Attention Heads: 32
+    - Layers: 24
+    - Positional Encoding: Rotary (RoPE)
+    - Activation Function: Nami (smooth and efficient nonlinearity)
+
+    Attributes:
+        vocab_size (int): Size of the model vocabulary.
+        dim (int): Embedding dimension and transformer model width.
+        heads (int): Number of attention heads used in multi-head self-attention.
+        num_layers (int): Number of stacked Transformer blocks.
+        mask (bool): Enables causal masking for autoregressive generation.
+
+    Notes:
+        - Uses weight tying between input and output embeddings.
+        - Part of the Hyuga series, optimized for strong generalization and decoding performance.
+    """
+
     def __init__(self, vocab_size, mask=True):
         super().__init__()
         self.dim = 2048

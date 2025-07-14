@@ -34,6 +34,30 @@ def merge_heads(x):
 
 
 class MhAttention(hk.Module):
+    
+    """
+    Multi-head self-attention module implemented in Haiku.
+
+    This module performs scaled dot-product attention over multiple heads, with optional causal masking.
+    It's a core component of Transformer-based architectures.
+
+    Args:
+        d_model (int): Total dimensionality of the input and output vectors (model width).
+        n_heads (int): Number of attention heads.
+        mask (bool): If True, applies causal masking to prevent attending to future tokens (default: False).
+        name (str): Optional name for the module (default: "attention").
+
+    Attributes:
+        d_model (int): Dimensionality of model input/output.
+        n_heads (int): Number of attention heads.
+        mask (bool): Whether causal masking is enabled.
+
+    Notes:
+        - Internally splits `d_model` across `n_heads` to compute queries, keys, and values.
+        - Attention output is projected back to `d_model` after concatenation.
+        - Causal masking is typically used during autoregressive generation.
+    """
+
     def __init__(self, d_model, n_heads, mask = False, name="attention"):
         super().__init__(name = name)
         self.d_model = d_model

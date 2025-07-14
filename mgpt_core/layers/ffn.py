@@ -18,6 +18,33 @@ import jax.random as random
 from nami.JAX import Nami
 
 class FFN_Nami(hk.Module):
+    
+    """
+    Feedforward network (FFN) block with Nami activation gating.
+
+    This module implements a Transformer-style FFN with a gated activation mechanism,
+    where the gating path uses the custom Nami activation function. The architecture
+    resembles Gated Linear Units (GLUs) or SwiGLU but uses Nami for potentially smoother 
+    gradient flow and improved expressivity.
+
+    Architecture:
+        x -> Linear (4 * out_feat) ---> (_x)
+        x -> Linear (4 * out_feat) -> Nami() ---> (gate)
+        output = proj(_x * gate)
+
+    Args:
+        out_feat (int): Output feature dimension of the FFN block.
+        name (str): Optional name for the module (default: "ffn_nami").
+
+    Attributes:
+        out_feat (int): Dimensionality of the final output after projection.
+
+    Notes:
+        - The intermediate hidden size is expanded to 4× `out_feat`.
+        - Gated activations improve expressiveness over standard MLPs.
+        - This FFN block is typically used after attention in a Transformer layer.
+    """
+
     def __init__(self, out_feat, name = "ffn_nami"):
         super().__init__(name = name)
         self.out_feat = out_feat
