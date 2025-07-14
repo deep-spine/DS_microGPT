@@ -103,18 +103,20 @@ class Transformer(nn.Module):
         return x
 
 
-class Hyuga_neuro05(nn.Module):
+class Hyuga_neuro(nn.Module):
     def __init__(self, vocab_size, mask=True):
         super().__init__()
         self.dim = 1024
         self.heads = 32
         self.num_layers = 42
         self.vocab_size = vocab_size
+        
 
         self.embed = nn.Embedding(vocab_size, self.dim)
         self.transformers = nn.ModuleList([
             Transformer(self.dim, self.heads, mask=mask) for _ in range(self.num_layers)
         ])
+        self.final_ln = nn.LayerNorm(self.dim)
 
         self.out_proj = lambda x: x @ self.embed.weight.T
 
@@ -122,7 +124,9 @@ class Hyuga_neuro05(nn.Module):
         x = self.embed(x)
         for block in self.transformers:
             x = block(x)
+        x = self.final_ln(x) 
         return self.out_proj(x)
+
 
 
 class Hyuga_echo(nn.Module):
@@ -137,6 +141,7 @@ class Hyuga_echo(nn.Module):
         self.transformers = nn.ModuleList([
             Transformer(self.dim, self.heads, mask=mask) for _ in range(self.num_layers)
         ])
+        self.final_ln = nn.LayerNorm(self.dim)
 
         self.out_proj = lambda x: x @ self.embed.weight.T
 
@@ -144,6 +149,7 @@ class Hyuga_echo(nn.Module):
         x = self.embed(x)
         for block in self.transformers:
             x = block(x)
+        x = self.final_ln(x) 
         return self.out_proj(x)
 
 # def count_parameters(model):

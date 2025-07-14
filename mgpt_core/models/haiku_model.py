@@ -33,7 +33,7 @@ class Transformer(hk.Module):
         return x
 
 
-class Hyuga_neuro05(hk.Module):
+class Hyuga_neuro(hk.Module):
     def __init__(
         self,
         vocab_size: int,
@@ -50,6 +50,8 @@ class Hyuga_neuro05(hk.Module):
         self.embedding_weights = hk.get_parameter(
             "embed", shape=[vocab_size, self.dim], init=hk.initializers.TruncatedNormal(stddev=0.02)
         )
+        self.final_ln = hk.LayerNorm(axis=-1, create_scale=True, create_offset=True)
+
 
         self.blocks = [
             Transformer(self.dim, self.heads, self.mask, name=f"transformer_{i}") for i in range(self.num_layers)
@@ -61,6 +63,8 @@ class Hyuga_neuro05(hk.Module):
 
         for block in self.blocks:
             x = block(x)
+
+        x = self.final_ln(x)
 
         # output projection: tie weights by using embedding matrix transposed
         logits = x @ self.embedding_weights.T
@@ -84,6 +88,7 @@ class Hyuga_echo(hk.Module):
         self.embedding_weights = hk.get_parameter(
             "embed", shape=[vocab_size, self.dim], init=hk.initializers.TruncatedNormal(stddev=0.02)
         )
+        self.final_ln = hk.LayerNorm(axis=-1, create_scale=True, create_offset=True)
 
         self.blocks = [
             Transformer(self.dim, self.heads, self.mask, name=f"transformer_{i}") for i in range(self.num_layers)
@@ -95,6 +100,8 @@ class Hyuga_echo(hk.Module):
 
         for block in self.blocks:
             x = block(x)
+
+        x = self.final_ln(x)
 
         # output projection: tie weights by using embedding matrix transposed
         logits = x @ self.embedding_weights.T
