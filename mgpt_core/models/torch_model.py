@@ -190,17 +190,17 @@ class Transformer(nn.Module):
         return x
 
 
-class Hyuga_neuro(nn.Module):
+class Hyuga(nn.Module):
 
     """
     Hyuga_neuro is a compact yet deep language model optimized for reasoning and high-throughput inference.
 
     Model Architecture:
-    - Parameters: ~756M
-    - Hidden Size (d_model): 1024
-    - FFN Inner Dimension: 4096
-    - Attention Heads: 32
-    - Layers: 42
+    - Parameters: ~362M
+    - Hidden Size (d_model): 512
+    - FFN Inner Dimension: 2048
+    - Attention Heads: 8
+    - Layers: 80
     - Positional Encoding: Rotary (RoPE)
     - Activation: Nami (custom smooth nonlinearity)
 
@@ -219,9 +219,9 @@ class Hyuga_neuro(nn.Module):
 
     def __init__(self, vocab_size, mask=True):
         super().__init__()
-        self.dim = 1024
-        self.heads = 32
-        self.num_layers = 42
+        self.dim = 512
+        self.heads = 8
+        self.num_layers = 80
         self.vocab_size = vocab_size
         
 
@@ -242,59 +242,10 @@ class Hyuga_neuro(nn.Module):
 
 
 
-class Hyuga_echo(nn.Module):
-
-    """
-    Hyuga_echo is a powerful language model designed for high-capacity reasoning and dialogue tasks, 
-    balancing depth and width for efficient inference at scale.
-
-    Model Architecture:
-    - Parameters: ~1.7B
-    - Hidden Size (d_model): 2048
-    - FFN Inner Dimension: 8192
-    - Attention Heads: 32
-    - Layers: 24
-    - Positional Encoding: Rotary (RoPE)
-    - Activation Function: Nami (smooth and efficient nonlinearity)
-
-    Attributes:
-        vocab_size (int): Size of the model vocabulary.
-        dim (int): Embedding dimension and transformer model width.
-        heads (int): Number of attention heads used in multi-head self-attention.
-        num_layers (int): Number of stacked Transformer blocks.
-        mask (bool): Enables causal masking for autoregressive generation.
-
-    Notes:
-        - Uses weight tying between input and output embeddings.
-        - Part of the Hyuga series, optimized for strong generalization and decoding performance.
-    """
-
-    def __init__(self, vocab_size, mask=True):
-        super().__init__()
-        self.dim = 2048
-        self.heads = 32
-        self.num_layers = 24
-        self.vocab_size = vocab_size
-
-        self.embed = nn.Embedding(vocab_size, self.dim)
-        self.transformers = nn.ModuleList([
-            Transformer(self.dim, self.heads, mask=mask) for _ in range(self.num_layers)
-        ])
-        self.final_ln = nn.LayerNorm(self.dim)
-
-        self.out_proj = lambda x: x @ self.embed.weight.T
-
-    def forward(self, x):
-        x = self.embed(x)
-        for block in self.transformers:
-            x = block(x)
-        x = self.final_ln(x) 
-        return self.out_proj(x)
-
 # def count_parameters(model):
 #     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
-# model = torch.compile(Hyuga_echo(vocab_size=52000, mask = True))
+# model = torch.compile(Hyuga_neuro(vocab_size=52000, mask = True))
 # print(model)
 # print(f"Total trainable parameters: {count_parameters(model):,}")
 

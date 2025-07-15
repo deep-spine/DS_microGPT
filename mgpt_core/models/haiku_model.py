@@ -63,17 +63,17 @@ class Transformer(hk.Module):
         return x
 
 
-class Hyuga_neuro(hk.Module):
+class Hyuga(hk.Module):
 
     """
     Hyuga_neuro is a compact yet deep language model optimized for reasoning and high-throughput inference.
 
     Model Architecture:
-    - Parameters: ~756M
-    - Hidden Size (d_model): 1024
-    - FFN Inner Dimension: 4096
-    - Attention Heads: 32
-    - Layers: 42
+    - Parameters: ~362M
+    - Hidden Size (d_model): 512
+    - FFN Inner Dimension: 2048
+    - Attention Heads: 8
+    - Layers: 80
     - Positional Encoding: Rotary (RoPE)
     - Activation: Nami (custom smooth nonlinearity)
 
@@ -94,13 +94,13 @@ class Hyuga_neuro(hk.Module):
         self,
         vocab_size: int,
         mask=True,
-        name="Hyuga_neuro05"
+        name="Hyuga"
     ):
         super().__init__(name=name)
         self.vocab_size = vocab_size
-        self.dim = 1024
-        self.heads = 32
-        self.num_layers = 42
+        self.dim = 512
+        self.heads = 8
+        self.num_layers = 80
         self.mask = mask
 
         self.embedding_weights = hk.get_parameter(
@@ -109,72 +109,11 @@ class Hyuga_neuro(hk.Module):
         self.final_ln = hk.LayerNorm(axis=-1, create_scale=True, create_offset=True)
 
 
-        self.blocks = [
-            Transformer(self.dim, self.heads, self.mask, name=f"transformer_{i}") for i in range(self.num_layers)
-        ]
+        self.blocks = tuple([
+            Transformer(self.dim, self.heads, self.mask, name=f"transformer_{i}")
+            for i in range(self.num_layers)
+        ])
 
-    def __call__(self, x: jnp.ndarray) -> jnp.ndarray:
-
-        x = jnp.take(self.embedding_weights, x, axis=0) 
-
-        for block in self.blocks:
-            x = block(x)
-
-        x = self.final_ln(x)
-
-        # output projection: tie weights by using embedding matrix transposed
-        logits = x @ self.embedding_weights.T
-        return logits
-
-
-class Hyuga_echo(hk.Module):
-
-    """
-    Hyuga_echo is a powerful language model designed for high-capacity reasoning and dialogue tasks, 
-    balancing depth and width for efficient inference at scale.
-
-    Model Architecture:
-    - Parameters: ~1.7B
-    - Hidden Size (d_model): 2048
-    - FFN Inner Dimension: 8192
-    - Attention Heads: 32
-    - Layers: 24
-    - Positional Encoding: Rotary (RoPE)
-    - Activation Function: Nami (smooth and efficient nonlinearity)
-
-    Attributes:
-        vocab_size (int): Size of the model vocabulary.
-        dim (int): Embedding dimension and transformer model width.
-        heads (int): Number of attention heads used in multi-head self-attention.
-        num_layers (int): Number of stacked Transformer blocks.
-        mask (bool): Enables causal masking for autoregressive generation.
-
-    Notes:
-        - Uses weight tying between input and output embeddings.
-        - Part of the Hyuga series, optimized for strong generalization and decoding performance.
-    """
-
-    def __init__(
-        self,
-        vocab_size: int,
-        mask=True,
-        name="Hyuga_echo"
-    ):
-        super().__init__(name=name)
-        self.vocab_size = vocab_size
-        self.dim = 2048
-        self.heads = 32
-        self.num_layers = 24
-        self.mask = mask
-
-        self.embedding_weights = hk.get_parameter(
-            "embed", shape=[vocab_size, self.dim], init=hk.initializers.TruncatedNormal(stddev=0.02), dtype=jnp.float16
-        )
-        self.final_ln = hk.LayerNorm(axis=-1, create_scale=True, create_offset=True)
-
-        self.blocks = [
-            Transformer(self.dim, self.heads, self.mask, name=f"transformer_{i}") for i in range(self.num_layers)
-        ]
 
     def __call__(self, x: jnp.ndarray) -> jnp.ndarray:
 
