@@ -58,28 +58,23 @@ class MhAttention(hk.Module):
         - Causal masking is typically used during autoregressive generation.
     """
 
-    def __init__(self, d_model, n_heads, mask = False, name="attention"):
-        super().__init__(name = name)
+    def __init__(self, d_model, n_heads, mask=False, name="attention"):
+        super().__init__(name=name)
         self.d_model = d_model
         self.n_heads = n_heads
         self.mask = mask
-    
-    def __call__(self, x:jnp.ndarray):
 
+    def __call__(self, x: jnp.ndarray):
         batch, seq, dim = x.shape
         n_dim = dim // self.n_heads
 
-        def safe_initializer(dtype=jnp.float16):
+        def safe_initializer():
             base_init = hk.initializers.VarianceScaling(
                 scale=1.0,
                 mode='fan_avg',
                 distribution='uniform'
             )
-
-            def casted(shape, dtype_unused):  # ignore dtype argument
-                return base_init(shape, jnp.float32).astype(dtype)  # init in float32, cast to float16
-
-            return casted
+            return lambda shape, dtype: base_init(shape, jnp.float32)
 
         init = safe_initializer()
 
@@ -88,34 +83,33 @@ class MhAttention(hk.Module):
         vw = hk.get_parameter('vw', shape=[self.d_model, self.d_model], init=init)
         ow = hk.get_parameter('ow', shape=[self.d_model, self.d_model], init=init)
 
-        Q = x @ qw
-        K = x @ kw
-        V = x @ vw
+        # Project to Q, K, V in float32 for numerical stability
+        Q = (x @ qw).astype(jnp.float32)
+        K = (x @ kw).astype(jnp.float32)
+        V = (x @ vw).astype(jnp.float32)
 
-        # split_heads fuction is useless for Q and K since RoPE has to be implemented 
-        # between reshape and transpose
         Q = Q.reshape(batch, seq, self.n_heads, n_dim)
         K = K.reshape(batch, seq, self.n_heads, n_dim)
         freq = get_freqs(seq, n_dim)
         Q = RoPE(Q, freq)
         K = RoPE(K, freq)
 
-        Q = jnp.transpose(Q, (0, 2, 1, 3))
-        K = jnp.transpose(K, (0, 2, 1, 3))
-        V = split_heads(V, self.n_heads)
+        Q = jnp.transpose(Q, (0, 2, 1, 3))  
+        K = jnp.transpose(K, (0, 2, 1, 3)) 
+        V = split_heads(V, self.n_heads)   
 
-        score = Q @ jnp.swapaxes(K, -1, -2) / jnp.sqrt(self.d_model)
-        score = score.astype(jnp.float32)
+        # Attention score: [B, H, T, T]
+        scale = jnp.sqrt(n_dim).astype(jnp.float32)
+        score = (Q @ jnp.swapaxes(K, -1, -2)) / scale
 
         if self.mask:
             mask = jnp.tril(jnp.ones((1, 1, seq, seq), dtype=jnp.float32))
             score = score - 1e10 * (1.0 - mask)
 
         weights = jax.nn.softmax(score, axis=-1)
-        attn = weights @ V
+        attn = weights @ V  
 
-        merged = merge_heads(attn)
-        out = merged @ ow
+        merged = merge_heads(attn) 
+        out = (merged @ ow).astype(x.dtype)  # Cast back to input dtype
+
         return out
-    
-
