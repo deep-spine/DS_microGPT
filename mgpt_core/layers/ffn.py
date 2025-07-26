@@ -54,19 +54,17 @@ class FFN_Nami(hk.Module):
         initializer = hk.initializers.VarianceScaling(
             scale=1.0,
             mode='fan_avg',
-            distribution='uniform',
-            dtype=jnp.float16
+            distribution='uniform'
         )
 
         fc = hk.Linear(output_size=self.out_feat * 4, w_init=initializer, b_init=jnp.zeros)
         gate = hk.Linear(output_size=self.out_feat * 4, w_init=initializer, b_init=jnp.zeros)
         proj = hk.Linear(output_size=self.out_feat, w_init=initializer, b_init=jnp.zeros)
 
-        nami = Nami()  # assuming it's your custom activation (like GELU, SwiGLU etc.)
+        nami = Nami()
 
         _x = fc(x)
         x_gate = nami(gate(x))
         x_proj = proj(_x * x_gate)
 
         return x_proj
-
