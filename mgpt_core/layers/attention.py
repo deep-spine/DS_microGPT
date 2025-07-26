@@ -70,18 +70,23 @@ class MhAttention(hk.Module):
         n_dim = dim // self.n_heads
 
         def safe_initializer(dtype=jnp.float16):
-            return hk.initializers.VarianceScaling(
-                scale=1.0,               # balanced variance
-                mode='fan_avg',          # works well for linear layers
-                distribution='uniform', # safer than normal for low-precision
-                dtype=dtype
+            base_init = hk.initializers.VarianceScaling(
+                scale=1.0,
+                mode='fan_avg',
+                distribution='uniform'
             )
 
-        init = safe_initializer(jnp.float16)
-        qw = hk.get_parameter('qw', shape=[self.d_model, self.d_model], init=init, dtype=jnp.float16)
-        kw = hk.get_parameter('kw', shape=[self.d_model, self.d_model], init=init, dtype=jnp.float16)
-        vw = hk.get_parameter('vw', shape=[self.d_model, self.d_model], init=init, dtype=jnp.float16)
-        ow = hk.get_parameter('ow', shape=[self.d_model, self.d_model], init=init, dtype=jnp.float16)
+            def casted(shape, dtype_unused):  # ignore dtype argument
+                return base_init(shape, jnp.float32).astype(dtype)  # init in float32, cast to float16
+
+            return casted
+
+        init = safe_initializer()
+
+        qw = hk.get_parameter('qw', shape=[self.d_model, self.d_model], init=init)
+        kw = hk.get_parameter('kw', shape=[self.d_model, self.d_model], init=init)
+        vw = hk.get_parameter('vw', shape=[self.d_model, self.d_model], init=init)
+        ow = hk.get_parameter('ow', shape=[self.d_model, self.d_model], init=init)
 
         Q = x @ qw
         K = x @ kw
