@@ -69,10 +69,19 @@ class MhAttention(hk.Module):
         batch, seq, dim = x.shape
         n_dim = dim // self.n_heads
 
-        qw = hk.get_parameter('qw', shape=[self.d_model, self.d_model], init=hk.initializers.RandomNormal(), dtype=jnp.float16)
-        kw = hk.get_parameter('kw', shape=[self.d_model, self.d_model], init=hk.initializers.RandomNormal(), dtype=jnp.float16)
-        vw = hk.get_parameter('vw', shape=[self.d_model, self.d_model], init=hk.initializers.RandomNormal(), dtype=jnp.float16)
-        ow = hk.get_parameter('ow', shape=[self.d_model, self.d_model], init=hk.initializers.RandomNormal(), dtype=jnp.float16)
+        def safe_initializer(dtype=jnp.float16):
+            return hk.initializers.VarianceScaling(
+                scale=1.0,               # balanced variance
+                mode='fan_avg',          # works well for linear layers
+                distribution='uniform', # safer than normal for low-precision
+                dtype=dtype
+            )
+
+        init = safe_initializer(jnp.float16)
+        qw = hk.get_parameter('qw', shape=[self.d_model, self.d_model], init=init, dtype=jnp.float16)
+        kw = hk.get_parameter('kw', shape=[self.d_model, self.d_model], init=init, dtype=jnp.float16)
+        vw = hk.get_parameter('vw', shape=[self.d_model, self.d_model], init=init, dtype=jnp.float16)
+        ow = hk.get_parameter('ow', shape=[self.d_model, self.d_model], init=init, dtype=jnp.float16)
 
         Q = x @ qw
         K = x @ kw

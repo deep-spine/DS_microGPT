@@ -12,9 +12,8 @@
 # ==============================================================================
 
 
-import jax.numpy as jnp
-
 def get_freqs(seq_len, dim, base=10000):
+    import jax.numpy as jnp
     
     """
     Generates rotary positional frequencies for use in RoPE.
@@ -35,6 +34,7 @@ def get_freqs(seq_len, dim, base=10000):
     return freqs
 
 def RoPE(x, freqs):
+    import jax.numpy as jnp
 
     """
     Applies Rotary Positional Embedding (RoPE) to input tensor using given frequencies.
@@ -59,9 +59,8 @@ def RoPE(x, freqs):
 
 
 
-import torch
-
 def get_freqs_t(seq_len, dim, base=10000, device=None):
+    import torch
 
     """
     Generates rotary positional frequencies (PyTorch version).
@@ -83,6 +82,7 @@ def get_freqs_t(seq_len, dim, base=10000, device=None):
     return freqs  
 
 def RoPE_t(x, freqs):
+    import torch
     
     """
     Applies Rotary Positional Embedding (RoPE) to input tensor using given frequencies (PyTorch version).

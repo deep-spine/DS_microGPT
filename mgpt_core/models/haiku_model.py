@@ -133,7 +133,7 @@ class Hyuga(hk.Module):
 # from mgpt_core.seed import KEYS
 # k1, k2, k3 = KEYS(42, 3)
 # def f(x):
-#     t = Hyuga_neuro05(
+#     t = Hyuga(
 #         vocab_size=50304,
 #         mask=True
 #         )

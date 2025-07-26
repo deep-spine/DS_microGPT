@@ -15,6 +15,7 @@
 from mgpt_core.seed import KEYS
 import haiku as hk
 import jax.random as random
+import jax.numpy as jnp
 from nami.JAX import Nami
 
 class FFN_Nami(hk.Module):
@@ -50,14 +51,22 @@ class FFN_Nami(hk.Module):
         self.out_feat = out_feat
 
     def __call__(self, x):
-        fc = hk.Linear(output_size = self.out_feat * 4)
-        gate = hk.Linear(output_size = self.out_feat * 4) 
-        proj = hk.Linear(output_size = self.out_feat)
-        nami = Nami()
+        initializer = hk.initializers.VarianceScaling(
+            scale=1.0,
+            mode='fan_avg',
+            distribution='uniform',
+            dtype=jnp.float16
+        )
+
+        fc = hk.Linear(output_size=self.out_feat * 4, w_init=initializer, b_init=jnp.zeros)
+        gate = hk.Linear(output_size=self.out_feat * 4, w_init=initializer, b_init=jnp.zeros)
+        proj = hk.Linear(output_size=self.out_feat, w_init=initializer, b_init=jnp.zeros)
+
+        nami = Nami()  # assuming it's your custom activation (like GELU, SwiGLU etc.)
 
         _x = fc(x)
         x_gate = nami(gate(x))
         x_proj = proj(_x * x_gate)
 
         return x_proj
-    
+
