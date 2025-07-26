@@ -70,7 +70,7 @@ class MhAttention(hk.Module):
 
         def safe_initializer():
             base_init = hk.initializers.VarianceScaling(
-                scale=1.0,
+                scale=0.01,
                 mode='fan_avg',
                 distribution='uniform'
             )
@@ -106,6 +106,7 @@ class MhAttention(hk.Module):
             mask = jnp.tril(jnp.ones((1, 1, seq, seq), dtype=jnp.float32))
             score = score - 1e10 * (1.0 - mask)
 
+        score = score - jnp.max(score, axis=-1, keepdims=True)
         weights = jax.nn.softmax(score, axis=-1)
         attn = weights @ V  
 

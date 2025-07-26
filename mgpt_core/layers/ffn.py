@@ -52,7 +52,7 @@ class FFN_Nami(hk.Module):
 
     def __call__(self, x):
         initializer = hk.initializers.VarianceScaling(
-            scale=1.0,
+            scale=0.01,
             mode='fan_avg',
             distribution='uniform'
         )

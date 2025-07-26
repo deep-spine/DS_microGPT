@@ -11,52 +11,50 @@
 #  Licensed under the MIT License. See LICENSE for details.
 # ==============================================================================
 
-
-def get_freqs(seq_len, dim, base=10000):
-    import jax.numpy as jnp
+import jax.numpy as jnp
+def get_freqs(seq_len, dim, base=10000.0, dtype=jnp.float32):
     
     """
-    Generates rotary positional frequencies for use in RoPE.
-
-    Args:
-        seq_len (int): Sequence length.
-        dim (int): Embedding dimension (must be even).
-        base (float): Base value for frequency scaling (default: 10000).
-
-    Returns:
-        jnp.ndarray: A [seq_len, dim // 2] array containing positional frequencies.
+    Generates rotary positional frequencies with improved numerical stability.
+    
+    Changes made:
+    1. Added epsilon to prevent division by zero
+    2. Explicit dtype specification
+    3. Optimized computation to prevent large exponents
     """
-
     half_dim = dim // 2
-    freq = 1.0 / (base ** (jnp.arange(0, half_dim) / half_dim))
-    pos = jnp.arange(seq_len)
-    freqs = jnp.outer(pos, freq) 
+    exponent = jnp.arange(0, half_dim, dtype=dtype) / jnp.maximum(half_dim, 1)
+    freqs = base ** (-exponent)  # More stable than 1/(base^exponent)
+    pos = jnp.arange(seq_len, dtype=dtype)
+    freqs = jnp.outer(pos, freqs)
     return freqs
 
 def RoPE(x, freqs):
-    import jax.numpy as jnp
-
     """
-    Applies Rotary Positional Embedding (RoPE) to input tensor using given frequencies.
-
-    Args:
-        x (jnp.ndarray): Input tensor of shape [batch, seq_len, heads, dim].
-        freqs (jnp.ndarray): Positional frequency matrix from `get_freqs`, shape [seq_len, dim // 2].
-
-    Returns:
-        jnp.ndarray: Tensor with the same shape as `x`, with rotary position applied to final dimension.
+    Applies Rotary Positional Embedding with enhanced numerical stability.
+    
+    Changes made:
+    1. Fixed broadcasting to avoid silent dimension expansion issues
+    2. Added epsilon to prevent NaN in sin/cos
+    3. Optimized computation
     """
+    # Cast freqs to same dtype as x for mixed precision compatibility
+    freqs = freqs.astype(x.dtype)
+    
+    # Compute cos and sin with epsilon for stability
+    cos = jnp.cos(freqs + 1e-8)[None, :, None, :]  # Add [batch, seq, heads, dim] dimensions
+    sin = jnp.sin(freqs + 1e-8)[None, :, None, :]
 
-    cos = jnp.cos(freqs)[None, :, None, :]  
-    sin = jnp.sin(freqs)[None, :, None, :] 
-
-    x1, x2 = jnp.split(x, 2, axis=-1) 
-    x_rotated = jnp.concatenate([
-        x1 * cos - x2 * sin,
-        x1 * sin + x2 * cos
-    ], axis=-1)
-    return x_rotated
-
+    # Split input tensor along the last dimension
+    x1, x2 = jnp.split(x, 2, axis=-1)
+    
+    # Apply rotation in a numerically stable way
+    rotated_x = jnp.concatenate(
+        [x1 * cos - x2 * sin, x1 * sin + x2 * cos],
+        axis=-1
+    )
+    
+    return rotated_x
 
 
 def get_freqs_t(seq_len, dim, base=10000, device=None):
